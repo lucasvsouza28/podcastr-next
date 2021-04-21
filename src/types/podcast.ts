@@ -2,14 +2,13 @@ interface Podcast {
     id: string;
     title: string;
     members: string;
-    published_at: string;
+    publishedAt: string;
     thumbnail: string;
     description: string;
-    file: {
-        url: string;
-        type: string;
-        duration: number;
-    }
+    url: string;
+    type: string;
+    duration: number;
+    durationStr: string;
 }
 
 export default Podcast;

@@ -1,13 +1,12 @@
-import { createContext } from 'react';
 import '../styles/global.scss';
 import styles from '../styles/app.module.scss';
 import Player from '../components/Player';
 import Header from '../components/Header';
-import store,{ state } from '../store';
+import GlobalContext, { state } from '../contexts/global';
 
 function MyApp({ Component, pageProps }) {
   return (
-    <store.Provider value={state}>
+    <GlobalContext.Provider value={state}>
       <div className={styles.wrapper}>
         <main>
           <Header />
@@ -17,7 +16,7 @@ function MyApp({ Component, pageProps }) {
         </main>
         <Player episode={state.currentEpisode} />
       </div>
-    </store.Provider>
+    </GlobalContext.Provider>
     )
 }
 

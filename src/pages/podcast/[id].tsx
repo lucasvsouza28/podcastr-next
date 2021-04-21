@@ -1,89 +1,71 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import {
+    GetStaticProps,
+    GetStaticPaths,
+} from 'next';
 import styles from './styles.module.scss';
 import Podcast from '../../types/podcast';
 import {
     getEpisodes
 } from '../../services/podcasts-service';
-import store from '../../store';
 
 type PodcastProps = {
-    previousEpisode: Podcast;
     episode: Podcast;
-    nextEpisode: Podcast;
 }
 
-export default function PodcastRoute({ episode, previousEpisode, nextEpisode }: PodcastProps){
-    const router = useRouter();
-
-    const handleNavigate = (e: any, episode: Podcast, setCurrentEpisode: any) => {
-        e.preventDefault();
-    
-        setCurrentEpisode(episode);
-        router.push(`/podcast/${episode.id}`);        
-    }
-
-    const renderArrow = (episode: Podcast, style: any) => {
-        if (episode) {
-            return (
-                <store.Consumer>
-                    {({ setCurrentEpisode })=> (
-                        <div
-                            className={style}
-                            onClick={e => handleNavigate(e, episode, setCurrentEpisode)}>
-                            <img  src="/arrow-left.svg" />
-                        </div>
-                    )}
-                </store.Consumer>
-            );
-        }
-            
-        return null;    
-    }
-    
+export default function PodcastRoute({ episode }: PodcastProps){
     return (
-        <div className={styles.container}>            
-            { renderArrow(previousEpisode, styles.arrowLeft) }
-            { renderArrow(nextEpisode, styles.arrowRight) }
+        <div className={styles.container}>
 
-            <h1>{episode.title}</h1>
+            <div className={styles.thumbnailContainer}>
+                <Link href="/">
+                    <button type="button">
+                        <img src='/arrow-left.svg' alt="Voltar" />
+                    </button>
+                </Link>
 
-            <p dangerouslySetInnerHTML={{ __html: episode.description }}></p>
+                <Image src={episode.thumbnail} width={700} height={160} objectFit="cover" />
+
+                <button type="button">
+                    <img src="/play.svg" />
+                </button>
+            </div>
+
+            <header>
+                <h1>{episode.title}</h1>
+                <span>{episode.members}</span>
+                <span>{episode.publishedAt}</span>
+                <span>{episode.durationStr}</span>
+            </header>
+
+            <div className={styles.description} dangerouslySetInnerHTML={{ __html: episode.description }} />
         </div>
         
     );    
 }
 
-export async function getStaticProps(context) {
+export const getStaticProps: GetStaticProps = async (context) => {
     const { id } = context.params;
     let episode: Podcast | null = null;
-    let previousEpisode: Podcast | null = null;
-    let nextEpisode: Podcast | null = null;
 
 
     if (id) {
-        const episodes = await getEpisodes();
-        
-        const episodeIndex = episodes.findIndex(e => e.id === id);
-        episode = episodes[episodeIndex];
-
-        if (episodeIndex > 0) previousEpisode = episodes[episodeIndex - 1];
-        if (episodeIndex >= 0 && episodeIndex < episodes.length - 1) nextEpisode = episodes[episodeIndex + 1];
+        const episodes = await getEpisodes();        
+        episode = episodes.find(e => e.id === id);
     }
 
     return {
         props: {
             episode,
-            previousEpisode,
-            nextEpisode
         }
     }
 }
 
-export async function getStaticPaths({  }) {
+export const getStaticPaths: GetStaticPaths = async () => {
     const episodes = await getEpisodes();
 
-    return {
+    return {        
         paths: episodes.map(e => {
             return {
                 params: {

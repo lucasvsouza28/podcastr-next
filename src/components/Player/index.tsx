@@ -1,26 +1,28 @@
-import { useState, useRef } from 'react';
+import Image from 'next/image';
+import { useState, useRef  } from 'react';
 import Podcast from '../../types/podcast';
 import styles from './styles.module.scss';
-import store from '../../store';
+import GlobalContext from '../../contexts/global';
+import parseTimeStamp from '../../utils/parseTimestamp';
 
-type PlayerProp = {
+type PlayerProps = {
     episode: Podcast;
 };
 
-
-
-export default function Player({ episode }) {
+export default function Player({ episode }: PlayerProps) {
     const [shuffle, setShuffle] = useState(false);
-    const [currentTime, setCurrentTime] = useState('00:00');
-    const [currentTimeInt, setCurrentTimeInt] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
 
     const handlePauseOrPlay = (e) => {
         e.preventDefault();
-        
-        if (isPlaying) audioRef.current.pause();
-        else audioRef.current.play();
+
+        if (audioRef?.current)
+        {
+            if (isPlaying) audioRef.current.pause();
+            else audioRef.current.play();
+        }
     };
     
     const handleRepeat = (e) => {
@@ -33,57 +35,43 @@ export default function Player({ episode }) {
         e.preventDefault();
         setShuffle(!shuffle);
     };
-    
-    const parseTimeStamp = (txt) => {
-        if (!txt) return txt;
-    
-        const sec_num = parseInt(txt, 10);
-        const hours   = Math.floor(sec_num / 3600);
-        const minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-        const seconds = sec_num - (hours * 3600) - (minutes * 60);
-        
-        function padleft(txt) {
-            return txt < 10 ? `0${txt}` : txt;
-        }
-    
-        return padleft(hours) + ':' + padleft(minutes) + ':' + padleft(seconds);
-    };
 
     return(
-        <store.Consumer>
-            {({  }) => (
+        <GlobalContext.Consumer>
+            {({ currentEpisode }) => (                
                 <div className={styles.container}>
                     <header>
                         <img  src="/playing.svg" alt="Tocando agora" />
                         <strong>Tocando agora</strong>
                     </header>
 
-                    <div
-                        className={styles.emptyPlayer}
-                        style={{
-                            backgroundImage: episode ? `url('${episode.thumbnail}')` : null,
-                            backgroundSize: 'cover',
-                            backgroundClip: 'padding-box'
-                        }}>
-                        { episode ? <strong>{episode.title}</strong> : <strong>Selecione um podcast para ouvir</strong> }                
-                    </div>
 
-                    <footer className={styles.empty}>
+                    { episode
+                        ? <Image className={styles.thumbnail} src={episode.thumbnail} width={300} height={300} objectFit='cover' />
+                        : <div className={styles.emptyPlayer}>
+                            <strong>Selecione um podcast para ouvir</strong>
+                        </div>
+                    }
+
+                    <div className={styles.info}>
+                        <h4>{episode?.title}</h4>
+                        <span>{episode?.members}</span>
+                    </div>                    
+
+                    <footer className={styles.empty} style={{ filter: isPlaying ? 'opacity(1)' : 'opacity(0.5)' }}>
                         <div className={styles.progress}>
                             <span>{parseTimeStamp(currentTime)}</span>                            
                             <div className={styles.slider}>
                                 <div className={styles.emptySlider} />
-                                {episode && currentTimeInt > 0 &&
+                                {episode && currentTime > 0 &&
                                     <div className={styles.innerSlider} style={{
-                                        width: (episode.file.duration / currentTimeInt) + '%'
+                                        width: `${(currentTime * 100) / episode.duration}%`
                                     }}>
-                                        <span style={{
-                                            left: (episode.file.duration / currentTimeInt) + '%'
-                                        }} />
+                                        <span />
                                     </div>
                                 }
                             </div>
-                            <span>{ parseTimeStamp(episode?.file.duration) ?? '00:00' }</span>
+                            <span>{ episode?.durationStr ?? '00:00' }</span>
                         </div>
 
                         { episode && 
@@ -92,17 +80,16 @@ export default function Player({ episode }) {
                                 id="audio"
                                 controls
                                 style={{ display: 'none' }}
-                                onTimeUpdate={(e) => {
-                                    setCurrentTimeInt(e.timeStamp)
-                                    setCurrentTime(e.timeStamp.toLocaleString())                                    
-                                }}
-                                onPlaying={(e) => setIsPlaying(true)}
-                                onPause={(e) => setIsPlaying(false)}>
-                                <source src={episode.file.url} type={episode.file.type} />
+                                onTimeUpdate={(e) => { setCurrentTime(e.target.currentTime) }}
+                                onPlaying={() => setIsPlaying(true)}
+                                onPause={() => setIsPlaying(false)}
+                                onSeeked={(e) => setCurrentTime(e.target.currentTime)}>
+                                <source src={currentEpisode.url} type={currentEpisode.type} />
                             </audio>
                         }
 
-                        <div className={styles.buttons}>
+                        <div
+                            className={styles.buttons}>
                             <button type="button" onClick={handleShuffleClick}>
                                 { shuffle && <span />}
                                 <img src="/shuffle.svg" alt="Embaralhar" />                        
@@ -112,7 +99,13 @@ export default function Player({ episode }) {
                                 <img src="/play-previous.svg" alt="Tocar anterior" />
                             </button>
 
-                            <button type="button" className={styles.playButton} onClick={handlePauseOrPlay}>
+                            <button
+                                type="button"
+                                className={styles.playButton}
+                                style={{
+                                    background: isPlaying ? 'var(--purple-800)' : 'var(--purple-400)'
+                                }}
+                                onClick={handlePauseOrPlay}>
                                 {!isPlaying ? <img src="/play.svg" alt="Tocar" /> : <img src="/pause.svg" alt="Tocar" /> }
                             </button>
 
@@ -128,6 +121,6 @@ export default function Player({ episode }) {
                 </div>
             )}
 
-        </store.Consumer>
+        </GlobalContext.Consumer>
     );
 }

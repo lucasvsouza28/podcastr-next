@@ -1,19 +1,21 @@
-import Link from 'next/link';
 import PodcastList from '../components/PodcastList';
+import {
+  getEpisodes
+} from '../services/podcasts-service'
 
-export default function Home({ episodes }) {
+export default function Home({ episodes, latest }) {
   return (
-    <PodcastList episodes={episodes} />
+    <PodcastList episodes={episodes} latest={latest} />
   )
 }
 
 export async function getStaticProps() {
-  const response = await fetch( process.env.API_URL + 'episodes');
-  const episodes = await response.json();
+  const episodes = await getEpisodes();
 
   return {
     props: {
-      episodes
+      episodes: episodes.slice(2, episodes.length),
+      latest: episodes.slice(0, 2)
     }
   }  
 }

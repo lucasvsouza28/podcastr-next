@@ -1,16 +1,42 @@
 import Podcast from "../types/podcast";
+import { format, parseISO } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR'
+import axios from 'axios';
+import convertDurationToTimeString from '../utils/convertDurationToTimeString';
 
-export const getEpisodes = async (): Promise<Podcast[]> => {
-    const response = await fetch(process.env.API_URL + 'episodes');
-    const episodes = await response.json() as Podcast[];
+const api = axios.create({
+    baseURL: process.env.API_URL
+});
 
-    return episodes;
+const parseEpisodes = (episodes: []): Podcast[] => {
+    return episodes.map((e: any) => {
+        return {
+            id: e.id,
+            title: e.title,
+            description: e.description,
+            members: e.members,
+            thumbnail: e.thumbnail,            
+            publishedAt: format(parseISO(e.published_at), 'd MMM yy', { locale: ptBR }),
+            url: e.file.url,
+            type: e.file.type,
+            duration: e.file.duration,
+            durationStr: convertDurationToTimeString(+e.file.duration)
+        }
+    });
 };
 
-export const getEpisodeById = async (id: number): Promise<Podcast> => {
-    const response = await fetch(process.env.API_URL + 'episodes');
-    const episodes = await response.json() as Podcast[];
-    const episode = episodes.find(e => e.id === episode);
+export const getEpisodes = async (): Promise<Podcast[]> => {
+    const response = await api.get('episodes', {
+        params: {
+            _limit: '12',
+            _sort: 'published_at',
+            _order: 'desc',
+        }
+    });
 
-    return episode;
+    const { data } = response;
+
+    const episodes = parseEpisodes(data);
+
+    return episodes;
 };

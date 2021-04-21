@@ -1,6 +1,6 @@
 import { createContext } from 'react';
-import Podcast from './types/podcast';
-import { getEpisodes  } from './services/podcasts-service';
+import Podcast from '../types/podcast';
+import { getEpisodes  } from '../services/podcasts-service';
 
 type stateType = {
     currentEpisode: Podcast | any;
