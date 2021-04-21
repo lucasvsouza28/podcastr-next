@@ -1,0 +1,58 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    width: 80%;
+    margin: 0 auto;
+
+    position: relative;
+
+    h1 {
+        margin-bottom: 1rem;
+    }
+
+    p {
+        font-size: 1.25rem;
+        font-family: Inter, sans-serif;
+    }
+
+    div {
+        position: absolute;
+        top: 50%;
+        width: 4rem;
+        height: 4rem;
+
+        background: var(--purple-500);       
+
+        border-radius: 0.5rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+
+        &:hover{
+            opacity: 0.8;
+        }
+
+        &:active {            
+            transform: scale(0.95);
+        }
+    }
+
+    .arrowLeft {        
+        left: -5rem;
+        background-color: var(--green-500);
+    }
+
+    .arrowRight {
+        right: -5rem;       
+
+        img {
+            transform: rotateY(180deg);
+        }
+    }
+}
