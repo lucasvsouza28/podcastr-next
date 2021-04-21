@@ -80,10 +80,10 @@ export default function Player({ episode }: PlayerProps) {
                                 id="audio"
                                 controls
                                 style={{ display: 'none' }}
-                                onTimeUpdate={(e) => { setCurrentTime(e.target.currentTime) }}
+                                onTimeUpdate={(e: any) => { setCurrentTime(e.target.currentTime) }}
                                 onPlaying={() => setIsPlaying(true)}
                                 onPause={() => setIsPlaying(false)}
-                                onSeeked={(e) => setCurrentTime(e.target.currentTime)}>
+                                onSeeked={(e: any) => setCurrentTime(e.target.currentTime)}>
                                 <source src={currentEpisode.url} type={currentEpisode.type} />
                             </audio>
                         }
