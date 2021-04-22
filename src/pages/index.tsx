@@ -3,7 +3,7 @@ import {
   getEpisodes
 } from '../services/podcasts-service'
 
-export default function Home({ episodes, latest }) {
+export default function Home({ episodes, latest }) {  
   return (
     <PodcastList episodes={episodes} latest={latest} />
   )

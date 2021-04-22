@@ -1,20 +1,24 @@
+import { useContext } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
     GetStaticProps,
     GetStaticPaths,
 } from 'next';
-import styles from './styles.module.scss';
 import Podcast from '../../types/podcast';
+import PlayerContext from '../../contexts/PlayerContext';
 import {
     getEpisodes
 } from '../../services/podcasts-service';
+import styles from './styles.module.scss';
 
 type PodcastProps = {
     episode: Podcast;
 }
 
 export default function PodcastRoute({ episode }: PodcastProps){
+    const { play } = useContext(PlayerContext);
+
     return (
         <div className={styles.container}>
 
@@ -27,7 +31,7 @@ export default function PodcastRoute({ episode }: PodcastProps){
 
                 <Image src={episode.thumbnail} width={700} height={160} objectFit="cover" />
 
-                <button type="button">
+                <button type="button" onClick={()=> play(episode)}>
                     <img src="/play.svg" />
                 </button>
             </div>
@@ -73,6 +77,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
                 }
             }
         }),
-        fallback: false
+        fallback: 'blocking'
     };
 }
