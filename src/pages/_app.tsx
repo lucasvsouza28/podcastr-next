@@ -10,13 +10,21 @@ import Podcast from '../types/podcast';
 function MyApp({ Component, pageProps }) {
   const [episodesList, setEpisodesList] = useState([] as Podcast[]);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const play = (episode) => {    
     setCurrentEpisodeIndex(episodesList.findIndex(e => e.id === episode.id));
+    setIsPlaying(true);
   };
 
   const changeEpisodesList = (episodes: Podcast[]) => {
     setEpisodesList(episodes);
+  }
+
+  const getCurrentEpisode = () => {
+    if(!episodesList || (!episodesList?.length ?? -1)) return null;
+
+    return  episodesList[currentEpisodeIndex];
   }
 
   const handleNext = (shuffle, repeat) => {
@@ -51,8 +59,27 @@ function MyApp({ Component, pageProps }) {
     setCurrentEpisodeIndex(index);
   }
 
+  const tooggleIsPlaying = () => {
+    setIsPlaying(!isPlaying);
+  }
+
+  const changeIsPlaying = (state) => {
+    setIsPlaying(state);
+  }
+
   return (
-    <GlobalContext.Provider value={{ episodesList, changeEpisodesList, currentEpisodeIndex, play, handleNext, handlePrevious }}>
+    <GlobalContext.Provider value={{
+      episodesList,
+      currentEpisodeIndex,
+      isPlaying,
+      getCurrentEpisode,
+      changeEpisodesList,
+      play,
+      handleNext,
+      handlePrevious,
+      changeIsPlaying,
+      tooggleIsPlaying
+    }}>
       <div className={styles.wrapper}>
         <main>
           <Header />

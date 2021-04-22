@@ -17,8 +17,29 @@ type PodcastProps = {
 }
 
 export default function PodcastRoute({ episode }: PodcastProps){
-    const { play } = useContext(PlayerContext);
+    const {
+        play,
+        isPlaying,
+        episodesList,
+        changeEpisodesList,
+        changeIsPlaying,
+        getCurrentEpisode
+    } = useContext(PlayerContext);
 
+    if (!episodesList.length){
+        changeEpisodesList([episode]);
+    }
+
+    const currentEpisode = getCurrentEpisode();
+
+    const handlePlayOrPause = () => {
+        if (!isPlaying) {
+            play(episode);
+        } else {
+            changeIsPlaying(false);
+        }
+    }
+    
     return (
         <div className={styles.container}>
 
@@ -29,10 +50,10 @@ export default function PodcastRoute({ episode }: PodcastProps){
                     </button>
                 </Link>
 
-                <Image src={episode.thumbnail} width={700} height={160} objectFit="cover" />
+                <Image className={styles.headerImage} src={episode.thumbnail} width={700} height={160} objectFit="cover" />
 
-                <button type="button" onClick={()=> play(episode)}>
-                    <img src="/play.svg" />
+                <button type="button" onClick={handlePlayOrPause}>
+                    { isPlaying && currentEpisode?.id === episode.id ? <img src="/pause.svg" /> : <img src="/play.svg" /> }
                 </button>
             </div>
 

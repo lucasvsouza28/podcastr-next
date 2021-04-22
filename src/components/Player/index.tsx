@@ -1,37 +1,44 @@
 import Image from 'next/image';
-import { useState, useRef, useContext  } from 'react';
+import { useState, useRef, useContext, useEffect  } from 'react';
 import PlayerContext from '../../contexts/PlayerContext';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import convertDurationToTimeString from '../../utils/convertDurationToTimeString';
 
-import styles from './styles.module.scss';
+//import styles from './styles.module.scss';
+import styles from './custom-style.module.scss';
 
 export default function Player({  }) {
     const {
-        episodesList,
-        currentEpisodeIndex,
+        isPlaying,
+        getCurrentEpisode,
         handleNext,
-        handlePrevious
+        handlePrevious,
+        changeIsPlaying,
+        tooggleIsPlaying,
     } = useContext(PlayerContext);
-    const currentEpisode = currentEpisodeIndex > -1 ? episodesList[currentEpisodeIndex] : null;
+
+    const currentEpisode = getCurrentEpisode();
 
     const [shuffle, setShuffle] = useState(false);
     const [repeat, setRepeat] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
 
-    const handlePauseOrPlay = (e) => {
-        e.preventDefault();
+    useEffect(() => {
 
-        if (audioRef?.current)
-        {
-            if (isPlaying) audioRef.current.pause();
-            else audioRef.current.play();
+        if (audioRef.current) {
+
+            if (isPlaying) {
+                audioRef.current.play();
+            } else {
+                audioRef.current.pause();
+            }
+
         }
-    };
-        
+
+    }, [isPlaying]);
+       
     const toogleShuffle = (e) => {
         e.preventDefault();
         setShuffle(!shuffle);
@@ -59,9 +66,15 @@ export default function Player({  }) {
             { currentEpisode
                 ? (
                     <div className={styles.currentEpisode}>
-                        <Image src={currentEpisode.thumbnail} width={592} height={592} objectFit='cover' />
-                        <strong>{currentEpisode.title}</strong>
-                        <span>{currentEpisode.members}</span>
+                        <Image
+                            src={currentEpisode.thumbnail}
+                            width={592}
+                            height={592}
+                            objectFit='cover' />
+                        <div className={styles.descriptions}>
+                            <strong>{currentEpisode.title}</strong>
+                            <span>{currentEpisode.members}</span>
+                        </div>
                     </div>
                 )
                 : <div className={styles.emptyPlayer}>
@@ -95,8 +108,8 @@ export default function Player({  }) {
                         autoPlay
                         style={{ display: 'none' }}
                         onTimeUpdate={(e: any) => { setCurrentTime(e.target.currentTime) }}
-                        onPlaying={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}                        
+                        onPlaying={() => changeIsPlaying(true)}
+                        onPause={() => changeIsPlaying(false)}                        
                         onSeeked={(e) => { setCurrentTime(e.timeStamp); }}
                         onChange={(e: any) => e.target.load()}
                         onEnded={(e: any) => { handleNext(shuffle, repeat); e.target.load() }}
@@ -121,7 +134,7 @@ export default function Player({  }) {
                         style={{
                             background: isPlaying ? 'var(--purple-800)' : 'var(--purple-400)'
                         }}
-                        onClick={handlePauseOrPlay}>
+                        onClick={tooggleIsPlaying}>
                         {!isPlaying ? <img src="/play.svg" alt="Tocar" /> : <img src="/pause.svg" alt="Tocar" /> }
                     </button>
 

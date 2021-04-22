@@ -11,7 +11,13 @@ type PodcastListProps = {
 };
 
 export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
-    const { play, changeEpisodesList } = useContext(PlayerContext);
+    const {
+        isPlaying,
+        play,
+        tooggleIsPlaying,
+        changeEpisodesList,
+        getCurrentEpisode,
+    } = useContext(PlayerContext);
     
     useEffect(() => {
         changeEpisodesList([
@@ -19,6 +25,16 @@ export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
             ...episodes
         ])
     },[]);
+
+    const currentEpisode = getCurrentEpisode();
+
+    const handlePlayOrPause = (episode) => {
+        if (!isPlaying) {
+            play(episode);
+        } else {
+            tooggleIsPlaying(false);
+        }
+    }
 
     return (        
         <div className={styles.podcastlistContainer}>                
@@ -43,8 +59,11 @@ export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
                                     <span>{episode.publishedAt}</span>
                                     <span>{episode.durationStr}</span>
                                 </div>
-                                <button type="button" onClick={() => play(episode)}>
-                                    <img src="/play-green.svg" alt="Tocar episódio" />
+                                <button type="button" onClick={() => handlePlayOrPause(episode)}>
+                                    { isPlaying && episode.id === currentEpisode.id
+                                        ? (<img src="/pause.svg" alt="Tocar episódio" />)
+                                        : (<img src="/play-green.svg" alt="Tocar episódio" />)
+                                    }
                                 </button>
                             </li>
                         )}
@@ -81,8 +100,11 @@ export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
                                 <td style={{ width: 100 }}>{episode.publishedAt}</td>
                                 <td>{episode.durationStr}</td>
                                 <td>
-                                    <button type="button" onClick={() => play(episode)}>
-                                        <img src="/play-green.svg" alt="Tocar episódio" />
+                                    <button type="button" onClick={() => handlePlayOrPause(episode)}>
+                                        { isPlaying && episode.id === currentEpisode.id
+                                            ? (<img src="/pause.svg" alt="Tocar episódio" />)
+                                            : (<img src="/play-green.svg" alt="Tocar episódio" />)
+                                        }
                                     </button>
                                 </td>
                             </tr>
