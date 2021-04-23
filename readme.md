@@ -1,4 +1,4 @@
-#Podcastr
+# Podcastr
 
 ## Sobre o projeto
 Player de podcast criado com as seguintes tecnologias:
