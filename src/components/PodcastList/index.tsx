@@ -1,8 +1,8 @@
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Podcast from "../../types/podcast";
-import PlayerContext from '../../contexts/PlayerContext';
+import { usePlayer } from '../../contexts/PlayerContext';
 import styles from './styles.module.scss';
 
 type PodcastListProps = {
@@ -14,10 +14,10 @@ export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
     const {
         isPlaying,
         play,
-        tooggleIsPlaying,
+        changeIsPlaying,
         changeEpisodesList,
         getCurrentEpisode,
-    } = useContext(PlayerContext);
+    } = usePlayer();
     
     useEffect(() => {
         changeEpisodesList([
@@ -28,11 +28,11 @@ export default function PodcastList ({ episodes, latest }: PodcastListProps ) {
 
     const currentEpisode = getCurrentEpisode();
 
-    const handlePlayOrPause = (episode) => {
-        if (!isPlaying) {
+    const handlePlayOrPause = (episode: Podcast) => {
+        if (isPlaying && episode.id !== currentEpisode.id) {
             play(episode);
         } else {
-            tooggleIsPlaying(false);
+            changeIsPlaying(false);
         }
     }
 

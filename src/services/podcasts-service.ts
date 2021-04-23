@@ -8,21 +8,20 @@ const api = axios.create({
     baseURL: process.env.API_URL
 });
 
-const parseEpisodes = (episodes: []): Podcast[] => {
-    return episodes.map((e: any) => {
-        return {
-            id: e.id,
-            title: e.title,
-            description: e.description,
-            members: e.members,
-            thumbnail: e.thumbnail,            
-            publishedAt: format(parseISO(e.published_at), 'd MMM yy', { locale: ptBR }),
-            url: e.file.url,
-            type: e.file.type,
-            duration: e.file.duration,
-            durationStr: convertDurationToTimeString(+e.file.duration)
-        }
-    });
+const parseEpisode = (episode): Podcast => {
+    
+    return {
+        id: episode.id,
+        title: episode.title,
+        description: episode.description,
+        members: episode.members,
+        thumbnail: episode.thumbnail,            
+        publishedAt: format(parseISO(episode.published_at), 'dd MMM yy', { locale: ptBR }),
+        url: episode.file.url,
+        type: episode.file.type,
+        duration: episode.file.duration,
+        durationStr: convertDurationToTimeString(+episode.file.duration)
+    }
 };
 
 export const getEpisodes = async (): Promise<Podcast[]> => {
@@ -36,7 +35,17 @@ export const getEpisodes = async (): Promise<Podcast[]> => {
 
     const { data } = response;
 
-    const episodes = parseEpisodes(data);
+    const episodes = data.map(parseEpisode);
 
     return episodes;
 };
+
+export const getEpisodeById = async (id: string) => {
+    const response = await api.get(`episodes/${id}`);
+
+    const { data } = response;
+
+    const episode = parseEpisode(data);
+
+    return episode;
+}

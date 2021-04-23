@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -6,11 +5,13 @@ import {
     GetStaticPaths,
 } from 'next';
 import Podcast from '../../types/podcast';
-import PlayerContext from '../../contexts/PlayerContext';
+import { usePlayer } from '../../contexts/PlayerContext';
 import {
-    getEpisodes
+    getEpisodeById,
+    getEpisodes,
 } from '../../services/podcasts-service';
 import styles from './styles.module.scss';
+import Head from 'next/head';
 
 type PodcastProps = {
     episode: Podcast;
@@ -18,13 +19,13 @@ type PodcastProps = {
 
 export default function PodcastRoute({ episode }: PodcastProps){
     const {
-        play,
         isPlaying,
         episodesList,
+        play,
         changeEpisodesList,
         changeIsPlaying,
         getCurrentEpisode
-    } = useContext(PlayerContext);
+    } = usePlayer();
 
     if (!episodesList.length){
         changeEpisodesList([episode]);
@@ -33,7 +34,7 @@ export default function PodcastRoute({ episode }: PodcastProps){
     const currentEpisode = getCurrentEpisode();
 
     const handlePlayOrPause = () => {
-        if (!isPlaying) {
+        if (isPlaying && episode.id !== currentEpisode.id) {
             play(episode);
         } else {
             changeIsPlaying(false);
@@ -42,6 +43,9 @@ export default function PodcastRoute({ episode }: PodcastProps){
     
     return (
         <div className={styles.container}>
+            <Head>
+                <title>Podcastr | {episode.title}</title>
+            </Head>
 
             <div className={styles.thumbnailContainer}>
                 <Link href="/">
@@ -50,9 +54,16 @@ export default function PodcastRoute({ episode }: PodcastProps){
                     </button>
                 </Link>
 
-                <Image className={styles.headerImage} src={episode.thumbnail} width={700} height={160} objectFit="cover" />
+                <Image
+                  className={styles.headerImage}
+                  src={episode.thumbnail}
+                  width={700}
+                  height={160}
+                  objectFit="cover" />
 
-                <button type="button" onClick={handlePlayOrPause}>
+                <button
+                  type="button"
+                  onClick={handlePlayOrPause}>
                     { isPlaying && currentEpisode?.id === episode.id ? <img src="/pause.svg" /> : <img src="/play.svg" /> }
                 </button>
             </div>
@@ -64,7 +75,11 @@ export default function PodcastRoute({ episode }: PodcastProps){
                 <span>{episode.durationStr}</span>
             </header>
 
-            <div className={styles.description} dangerouslySetInnerHTML={{ __html: episode.description }} />
+            <div
+              className={styles.description}
+              dangerouslySetInnerHTML={{
+                __html: episode.description
+              }} />
         </div>
         
     );    
@@ -76,8 +91,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
 
     if (id) {
-        const episodes = await getEpisodes();        
-        episode = episodes.find(e => e.id === id);
+        episode = await getEpisodeById(id as string);
     }
 
     return {

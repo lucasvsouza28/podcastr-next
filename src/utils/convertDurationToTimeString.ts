@@ -1,9 +1,9 @@
 export default function convertDurationToTimeString(duration: number) {
     const hours = Math.floor(duration / (60 * 60));
     const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = (duration % 60).toPrecision(2);
+    const seconds = (duration % 60);
     const finalResult = [ hours, minutes, seconds ]
-        .map(unit => String(unit).padStart(2, '0'))
+        .map(unit => parseInt(unit.toString()).toString().padStart(2, '0'))
         .join(':');
 
     return finalResult;

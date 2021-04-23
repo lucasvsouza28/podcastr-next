@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import PodcastList from '../components/PodcastList';
 import {
   getEpisodes
@@ -5,7 +6,14 @@ import {
 
 export default function Home({ episodes, latest }) {  
   return (
-    <PodcastList episodes={episodes} latest={latest} />
+    <>
+      <Head>
+        <title>Podcastr | Home</title>
+      </Head>
+      <PodcastList
+        episodes={episodes}
+        latest={latest} />
+    </>
   )
 }
 
